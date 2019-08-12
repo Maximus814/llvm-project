@@ -49,8 +49,6 @@ RISCVSubtarget::RISCVSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
       FrameLowering(initializeSubtargetDependencies(TT, CPU, FS, ABIName)),
       InstrInfo(), RegInfo(getHwMode()), TLInfo(TM, *this) {}
 
-// Return how the function given by GV should be invoked:
-// via PLT, by taking its address from GOT, or with a direct call.
 unsigned char RISCVSubtarget::classifyGlobalFunctionReference(
     const GlobalValue *GV, const TargetMachine &TM) const {
   auto *F = dyn_cast<Function>(GV);
