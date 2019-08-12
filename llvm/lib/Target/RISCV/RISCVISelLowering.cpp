@@ -2194,7 +2194,6 @@ SDValue RISCVTargetLowering::LowerCall(CallLoweringInfo &CLI,
     unsigned OpFlags =
              Subtarget.classifyGlobalFunctionReference(GV, getTargetMachine());
 
-    // Call implementation without plt
     if (OpFlags == RISCVII::MO_GOT_HI)
       Callee = getAddr(S, DAG, 0);
     else
