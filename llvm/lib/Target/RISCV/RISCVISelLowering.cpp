@@ -2191,11 +2191,15 @@ SDValue RISCVTargetLowering::LowerCall(CallLoweringInfo &CLI,
   if (GlobalAddressSDNode *S = dyn_cast<GlobalAddressSDNode>(Callee)) {
     const GlobalValue *GV = S->getGlobal();
 
-    unsigned OpFlags = RISCVII::MO_CALL;
-    if (!getTargetMachine().shouldAssumeDSOLocal(*GV->getParent(), GV))
-      OpFlags = RISCVII::MO_PLT;
+    unsigned OpFlags =
+             Subtarget.classifyGlobalFunctionReference(GV, getTargetMachine());
 
-    Callee = DAG.getTargetGlobalAddress(GV, DL, PtrVT, 0, OpFlags);
+    // Call implementation without plt
+    if (OpFlags == RISCVII::MO_GOT_HI)
+      Callee = getAddr(S, DAG, 0);
+    else
+      Callee = DAG.getTargetGlobalAddress(GV, DL, PtrVT, 0, OpFlags);
+
   } else if (ExternalSymbolSDNode *S = dyn_cast<ExternalSymbolSDNode>(Callee)) {
     unsigned OpFlags = RISCVII::MO_CALL;
 

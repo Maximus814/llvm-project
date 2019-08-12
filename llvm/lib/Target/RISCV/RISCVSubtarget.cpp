@@ -48,3 +48,17 @@ RISCVSubtarget::RISCVSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
     : RISCVGenSubtargetInfo(TT, CPU, FS),
       FrameLowering(initializeSubtargetDependencies(TT, CPU, FS, ABIName)),
       InstrInfo(), RegInfo(getHwMode()), TLInfo(TM, *this) {}
+
+// This function is used only for NoPlt/NonLazyBind handling
+// but it should be extended by different types of executable files
+unsigned char RISCVSubtarget::classifyGlobalFunctionReference(
+    const GlobalValue *GV, const TargetMachine &TM) const {
+  auto *F = dyn_cast<Function>(GV);
+  if (F && !TM.shouldAssumeDSOLocal(*GV->getParent(), GV)) {
+    // We can call function without plt via got but it needs non-lazy start
+    if (F->hasFnAttribute(Attribute::NonLazyBind))
+      return RISCVII::MO_GOT_HI;
+    return RISCVII::MO_PLT;
+  }
+  return RISCVII::MO_CALL;
+}
